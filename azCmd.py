@@ -159,7 +159,7 @@ if __name__ == '__main__':
         for container in containers:
             print('drwxrwxrwx root root - {mtime:%b %d %H:%M} {name:s}'.format(
                 mtime=datetime.strptime(container.properties.last_modified, "%a, %d %b %Y %H:%M:%S %Z"),
-                name=iface._parse_container_name_incoming(container.name)))
+                name=container.name))
 
     if args.cmd == 'rmdir':
         iface.rmdir(args.remote)
