@@ -30,12 +30,10 @@ class AzCmd(object):
     def rmdir(self, container_name):
         container_name = container_name.rstrip('/') + '/'
         container = self._get_container_name(container_name)
-        print("Container: " + container)
         if container == container_name:
             return self._service.delete_container(container)
         else:
             blobprefix = self._get_blob_prefix(container_name)
-            print("Blobprefix: " + blobprefix)
             blobs = self._service.list_blobs(container, blobprefix)
             for blob in blobs:
                 self._service.delete_blob(container, blob.name)
@@ -95,7 +93,6 @@ class AzCmd(object):
         return container
 
     def _get_blob_prefix(self, path):
-        print("Prefix for: " + path)
         blobname = self._get_blob_name(path)
         prefix, sep, filename = blobname.rpartition('/')
         if len(prefix) > 0:
@@ -179,7 +176,7 @@ if __name__ == '__main__':
     if args.cmd == 'ls':
         blobs = iface.ls(args.remote)
         for blob in blobs:
-            print('{d:c}rwxrwxrwx root root {size:d} {mtime:%b %d %H:%M} {name:s}'.format(
+            print('{d:s}rwxrwxrwx root root {size:d} {mtime:%b %d %H:%M} {name:s}'.format(
                 d='d' if blob.directory else '-',
                 size=blob.properties.content_length,
                 mtime=datetime.strptime(blob.properties.last_modified, "%a, %d %b %Y %H:%M:%S %Z"),
