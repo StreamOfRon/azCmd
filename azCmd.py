@@ -10,15 +10,18 @@ import azure
 
 
 class AzCmd(object):
+    _client = None
     _service = None
 
     def __init__(self, account, key):
         self.connect(account, key)
 
     def connect(self, account, key):
+        if self._client is None:
+            from azure.storage import CloudStorageAccount
+            self._client = CloudStorageAccount(account, key)
         if self._service is None:
-            from azure.storage import BlobService
-            self._service = BlobService(account, key)
+            self._service = self._client.create_blob_service()
 
     def mkdir(self, container_name):
         container = self._get_container_name(container_name)
@@ -43,7 +46,7 @@ class AzCmd(object):
         blobname = self._get_blob_name(remote)
         try:
             self._service.put_block_blob_from_path(container, blobname, local)
-        except (azure.WindowsAzureMissingResourceError):
+        except azure.common.AzureMissingResourceHttpError:
             self.mkdir(container)
             self._service.put_block_blob_from_path(container, blobname, local)
 
@@ -176,7 +179,7 @@ if __name__ == '__main__':
     if args.cmd == 'ls':
         blobs = iface.ls(args.remote)
         for blob in blobs:
-            print('{d:s}rwxrwxrwx root root {size:d} {mtime:%b %d %H:%M} {name:s}'.format(
+            print('{d:s}rw-rw-rw- root root {size:d} {mtime:%b %d %H:%M} {name:s}'.format(
                 d='d' if blob.directory else '-',
                 size=blob.properties.content_length,
                 mtime=datetime.strptime(blob.properties.last_modified, "%a, %d %b %Y %H:%M:%S %Z"),
